@@ -8,8 +8,31 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @EnvironmentObject var onboardingManager: OnboardingManager
+
     var body: some View {
-        Text("Onboarding")
+        ZStack {
+            switch onboardingManager.currentScreenIndex {
+            case 0:
+                Onboard1()
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+
+            case 1:
+                Onboard2()
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+
+            case 2:
+                OnboardDemoView()
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+
+            case 3:
+                OnboardPaywall()
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+
+            default:
+                EmptyView()
+            }
+        }
     }
 }
 
