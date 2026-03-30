@@ -12,10 +12,11 @@ struct OnboardDemoView: View {
 
     var body: some View {
         ZStack {
-            Color.green.ignoresSafeArea()
+            Color.black.ignoresSafeArea()
 
-            Button("Onboard Demo") {
-                onboardManager.nextScreen()
+            VStack {
+                Text("Let's Take A Demo")
+                    .font(.system(size: 32, weight: .semibold))
             }
         }
     }
