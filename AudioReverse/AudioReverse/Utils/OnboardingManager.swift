@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
-import Combine
+import Observation
 
-class OnboardingManager: ObservableObject {
+@MainActor @Observable
+class OnboardingManager {
 
-    @Published var currentScreenIndex = 0
-    @AppStorage("isOnboardComplete") var isOnboardingShown: Bool = false
+    var currentScreenIndex = 0
+
+    var isOnboardingShown: Bool {
+        get { UserDefaults.standard.bool(forKey: "isOnboardComplete") }
+        set { UserDefaults.standard.set(newValue, forKey: "isOnboardComplete") }
+    }
 
     func nextScreen() {
         if currentScreenIndex < 3 {

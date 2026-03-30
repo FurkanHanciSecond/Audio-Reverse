@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @EnvironmentObject var onboardingManager: OnboardingManager
+    @Environment(OnboardingManager.self) var onboardingManager
 
     var body: some View {
         ZStack {
@@ -33,9 +33,11 @@ struct OnboardingView: View {
                 EmptyView()
             }
         }
+        .animation(.easeInOut, value: onboardingManager.currentScreenIndex)
     }
 }
 
 #Preview {
     OnboardingView()
+        .environment(OnboardingManager())
 }

@@ -9,16 +9,19 @@ import SwiftUI
 
 struct OnboardPaywall: View {
 
-    @EnvironmentObject var onboardManager: OnboardingManager
+    @Environment(OnboardingManager.self) var onboardManager
 
     var body: some View {
-        Text("Onboard Paywall")
-            .onTapGesture {
+        ZStack {
+            Color.gray.ignoresSafeArea()
+            Button("Onboard Paywall") {
                 onboardManager.completeOnboarding()
             }
+        }
     }
 }
 
 #Preview {
     OnboardPaywall()
+        .environment(OnboardingManager())
 }

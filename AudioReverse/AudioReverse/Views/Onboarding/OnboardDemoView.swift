@@ -8,16 +8,20 @@
 import SwiftUI
 
 struct OnboardDemoView: View {
-    @EnvironmentObject var onboardManager: OnboardingManager
+    @Environment(OnboardingManager.self) var onboardManager
 
     var body: some View {
-        Text("Onboard Demo")
-            .onTapGesture {
+        ZStack {
+            Color.green.ignoresSafeArea()
+
+            Button("Onboard Demo") {
                 onboardManager.nextScreen()
             }
+        }
     }
 }
 
 #Preview {
     OnboardDemoView()
+        .environment(OnboardingManager())
 }

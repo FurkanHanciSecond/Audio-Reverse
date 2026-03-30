@@ -9,16 +9,18 @@ import SwiftUI
 
 @main
 struct AudioReverseApp: App {
-    @StateObject var onboardingManager = OnboardingManager()
+    @State var onboardingManager = OnboardingManager()
 
     var body: some Scene {
         WindowGroup {
-            if onboardingManager.isOnboardingShown {
-                MainTabView()
-            } else {
-                OnboardingView()
-                    .environmentObject(onboardingManager)
-            }
+            OnboardingView()
+                .environment(onboardingManager)
+//            if onboardingManager.isOnboardingShown {
+//                MainTabView()
+//            } else {
+//                OnboardingView()
+//                    .environment(onboardingManager)
+//            }
         }
     }
 }

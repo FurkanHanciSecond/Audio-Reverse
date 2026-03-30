@@ -7,30 +7,24 @@
 
 import SwiftUI
 
+enum AppTab {
+    case home, settings
+}
+
 struct MainTabView: View {
-    @State private var selection = 0
+    @State private var selection: AppTab = .home
 
     var body: some View {
         TabView(selection: $selection) {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
-                .tag(0)
+            Tab("Home", systemImage: "house", value: .home) {
+                HomeView()
+            }
 
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
-                }
-                .tag(1)
+            Tab("Settings", systemImage: "gear", value: .settings) {
+                SettingsView()
+            }
         }
-        .onAppear {
-            UITabBar.appearance().isHidden = false
-        }
-        .onChange(of: selection) { newValue, oldValue in
-            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-            impactFeedback.impactOccurred()
-        }
-        .accentColor(.white)
+        .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.5), trigger: selection)
+        .tint(.white)
     }
 }
