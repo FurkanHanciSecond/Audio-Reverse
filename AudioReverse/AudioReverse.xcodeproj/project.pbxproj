@@ -10,9 +10,22 @@
 		706CE55C2F7AAF9900FE7CB1 /* AudioReverse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioReverse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		70E70C642F7ACF7200146782 /* Exceptions for "AudioReverse" folder in "AudioReverse" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 706CE55B2F7AAF9900FE7CB1 /* AudioReverse */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		706CE55E2F7AAF9900FE7CB1 /* AudioReverse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				70E70C642F7ACF7200146782 /* Exceptions for "AudioReverse" folder in "AudioReverse" target */,
+			);
 			path = AudioReverse;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,8 @@
 				DEVELOPMENT_TEAM = F97AL9VQUZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AudioReverse/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record voice and reverse it";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +303,8 @@
 				DEVELOPMENT_TEAM = F97AL9VQUZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AudioReverse/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record voice and reverse it";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

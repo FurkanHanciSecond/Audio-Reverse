@@ -19,9 +19,7 @@ class AudioRecorder {
     private var audioRecorder: AVAudioRecorder?
     private var timer: Timer?
 
-    private var recordingsDirectory: URL {
-        URL.documentsDirectory.appending(path: "Recordings\(UUID().uuidString)")
-    }
+    private let recordingsDirectory = URL.documentsDirectory.appending(path: "Recordings")
 
     private var recordingSettings: [String: Any] {
         [
