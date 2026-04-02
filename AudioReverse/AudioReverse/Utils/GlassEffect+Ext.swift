@@ -19,6 +19,16 @@ extension View {
     }
 
     @ViewBuilder
+    func compatibleGlassEffectCapsule(cornerRadius: CGFloat, interactiveEnabled: Bool) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.clear.interactive(interactiveEnabled), in: .capsule)
+        } else {
+            self
+                .background(.ultraThinMaterial, in: .capsule)
+        }
+    }
+
+    @ViewBuilder
     func compatibleGlassEffectRegular(cornerRadius: CGFloat, interactiveEnabled: Bool) -> some View {
         if #available(iOS 26.0, *) {
             self.glassEffect(.regular.interactive(interactiveEnabled), in: .rect(cornerRadius: cornerRadius))

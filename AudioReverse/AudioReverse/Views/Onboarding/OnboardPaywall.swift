@@ -13,7 +13,7 @@ struct OnboardPaywall: View {
 
     var body: some View {
         ZStack {
-            Color.gray.ignoresSafeArea()
+            Color.black.ignoresSafeArea()
             Button("Onboard Paywall") {
                 onboardManager.completeOnboarding()
             }

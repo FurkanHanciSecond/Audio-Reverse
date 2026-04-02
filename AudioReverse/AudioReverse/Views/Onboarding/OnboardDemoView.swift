@@ -19,7 +19,7 @@ struct OnboardDemoView: View {
     @State private var isReversing = false
     @State private var showSuccessOverlay = false
 
-    private let demoText = String(localized: "Let's Take A Demo")
+    private let demoText = String(localized: "Try it yourself!")
     private let animationDelay: Duration = .milliseconds(50)
 
     var body: some View {
@@ -28,7 +28,7 @@ struct OnboardDemoView: View {
 
             VStack(spacing: 40) {
                 Text(displayedText)
-                    .font(.system(size: 32, weight: .semibold))
+                    .font(.system(size: 45, weight: .semibold))
                     .multilineTextAlignment(.center)
 
                 if textAnimationComplete {
@@ -52,11 +52,12 @@ struct OnboardDemoView: View {
         .sensoryFeedback(.impact(flexibility: .solid, intensity: 1), trigger: currentCharacterIndex)
         .onChange(of: player.isPlaying) { oldValue, newValue in
             if oldValue, !newValue, reversedURL != nil {
-                withAnimation {
-                    showSuccessOverlay = true
-                }
                 Task {
                     try? await Task.sleep(for: .seconds(1))
+                    withAnimation {
+                        showSuccessOverlay = true
+                    }
+                    try? await Task.sleep(for: .seconds(1.5))
                     onboardManager.nextScreen()
                 }
             }
@@ -84,6 +85,7 @@ struct OnboardDemoView: View {
                     .font(.system(size: 30))
                     .foregroundStyle(.white)
             }
+            .compatibleCircularGlassEffect(interactiveEnabled: true)
         }
         .sensoryFeedback(.impact, trigger: recorder.isRecording)
     }
@@ -103,20 +105,16 @@ struct OnboardDemoView: View {
                 isReversing = false
             }
         } label: {
-            if isReversing {
-                ProgressView()
-                    .tint(.white)
-            } else {
-                Text("Reverse")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 30)
-                    .padding(.vertical, 14)
-                    .background(.white.opacity(0.15), in: .capsule)
-            }
+            Text("Reverse")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 40)
+                .padding(.vertical, 14)
+                .background(.white.opacity(0.15), in: .capsule)
         }
         .disabled(isReversing)
         .transition(.scale.combined(with: .opacity))
+        .compatibleGlassEffectCapsule(cornerRadius: 15, interactiveEnabled: true)
     }
 
     private func playButton(url: URL) -> some View {
