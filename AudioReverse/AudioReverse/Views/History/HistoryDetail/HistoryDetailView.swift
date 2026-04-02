@@ -8,11 +8,18 @@
 import SwiftUI
 
 struct HistoryDetailView: View {
+    let item: AudioHistoryItem
+
     var body: some View {
-        Text("History Detail")
+        Text("History Detail \(item.sourceType)")
     }
 }
 
 #Preview {
-    HistoryDetailView()
+    HistoryDetailView(item: AudioHistoryItem(
+        name: "Sample Recording",
+        sourceType: .recording,
+        originalFilePath: "",
+        duration: 90
+    ))
 }

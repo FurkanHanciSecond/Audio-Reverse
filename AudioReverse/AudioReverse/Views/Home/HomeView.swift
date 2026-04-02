@@ -20,6 +20,7 @@ struct HomeView: View {
     @State private var isReversing = false
     @State private var showFilePicker = false
     @State private var importedFileURL: URL?
+    @State private var errorMessage: String?
 
     private var hasRecording: Bool {
         !recorder.isRecording && (recorder.recordingURL != nil || importedFileURL != nil)
@@ -69,6 +70,14 @@ struct HomeView: View {
             ) { result in
                 handleImportedFile(result)
             }
+            .alert("Error", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK") { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
         }
     }
 
@@ -83,7 +92,8 @@ struct HomeView: View {
                 title: recorder.isRecording ? "Stop Recording" : "Start Recording",
                 color: .red,
                 isActive: recorder.isRecording,
-                isDisabled: false
+                isDisabled: false,
+                currentTime: recorder.currentTime
             )
         }
         .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: true)
@@ -100,7 +110,8 @@ struct HomeView: View {
                 title: normalPlayer.isPlaying ? "Stop" : "Play Recorded",
                 color: .green,
                 isActive: normalPlayer.isPlaying,
-                isDisabled: !hasRecording
+                isDisabled: !hasRecording,
+                currentTime: normalPlayer.remainingTime
             )
         }
         .disabled(!hasRecording)
@@ -119,7 +130,8 @@ struct HomeView: View {
                 title: reversedPlayer.isPlaying ? "Stop" : "Play Reversed",
                 color: .blue,
                 isActive: reversedPlayer.isPlaying,
-                isDisabled: reversedURL == nil
+                isDisabled: reversedURL == nil,
+                currentTime: reversedPlayer.remainingTime
             )
         }
         .disabled(reversedURL == nil)
@@ -154,7 +166,8 @@ struct HomeView: View {
         title: String,
         color: Color,
         isActive: Bool,
-        isDisabled: Bool
+        isDisabled: Bool,
+        currentTime: TimeInterval = 0
     ) -> some View {
         VStack(spacing: 14) {
             Image(systemName: icon)
@@ -167,7 +180,7 @@ struct HomeView: View {
                 .foregroundStyle(.white)
 
             if isActive {
-                recordingIndicator(color: color)
+                recordingIndicator(color: color, currentTime: currentTime)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -193,14 +206,14 @@ struct HomeView: View {
         .animation(.easeInOut(duration: 0.3), value: isActive)
     }
 
-    private func recordingIndicator(color: Color) -> some View {
+    private func recordingIndicator(color: Color, currentTime: TimeInterval) -> some View {
         HStack(spacing: 6) {
             Circle()
                 .fill(color)
                 .frame(width: 8, height: 8)
                 .shadow(color: color, radius: 4)
 
-            Text(String(format: "%.1fs", recorder.currentTime))
+            Text(String(format: "%.1fs", currentTime))
                 .font(.system(size: 14, weight: .medium, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.8))
         }
@@ -243,36 +256,43 @@ struct HomeView: View {
     }
 
     private func handleImportedFile(_ result: Result<[URL], Error>) {
-        guard case .success(let urls) = result,
-              let selectedURL = urls.first else { return }
+        switch result {
+        case .failure:
+            return
+        case .success(let urls):
+            guard let selectedURL = urls.first else { return }
+            importFile(from: selectedURL)
+        }
+    }
 
-        guard selectedURL.startAccessingSecurityScopedResource() else { return }
+    private func importFile(from selectedURL: URL) {
+        guard selectedURL.startAccessingSecurityScopedResource() else {
+            errorMessage = "Could not access the selected file."
+            return
+        }
         defer { selectedURL.stopAccessingSecurityScopedResource() }
 
-        let destination = URL.documentsDirectory
-            .appending(path: "Imported")
-            .appending(path: selectedURL.lastPathComponent)
+        let importDir = URL.documentsDirectory.appending(path: "Imported")
+        let uniqueName = "\(UUID().uuidString)_\(selectedURL.lastPathComponent)"
+        let destination = importDir.appending(path: uniqueName)
 
         do {
-            let importDir = destination.deletingLastPathComponent()
             if !FileManager.default.fileExists(atPath: importDir.path()) {
                 try FileManager.default.createDirectory(at: importDir, withIntermediateDirectories: true)
             }
-
-            if FileManager.default.fileExists(atPath: destination.path()) {
-                try FileManager.default.removeItem(at: destination)
-            }
             try FileManager.default.copyItem(at: selectedURL, to: destination)
-
-            normalPlayer.stop()
-            reversedPlayer.stop()
-            importedFileURL = destination
-            reversedURL = nil
-
-            reverseAudio(from: destination, sourceType: .fileImport)
         } catch {
-            importedFileURL = nil
+            errorMessage = "Failed to import file: \(error.localizedDescription)"
+            return
         }
+
+        normalPlayer.stop()
+        reversedPlayer.stop()
+        importedFileURL = nil
+        reversedURL = nil
+
+        importedFileURL = destination
+        reverseAudio(from: destination, sourceType: .fileImport)
     }
 
     private func reverseAudio(from url: URL?, sourceType: AudioSourceType) {
@@ -287,6 +307,7 @@ struct HomeView: View {
                 saveHistoryItem(sourceURL: url, reversedURL: reversed, sourceType: sourceType)
             } catch {
                 reversedURL = nil
+                errorMessage = "Failed to reverse audio: \(error.localizedDescription)"
             }
             withAnimation {
                 isReversing = false
@@ -306,6 +327,7 @@ struct HomeView: View {
             duration: duration
         )
         modelContext.insert(item)
+        try? modelContext.save()
     }
 
     private func audioDuration(for url: URL) -> TimeInterval {

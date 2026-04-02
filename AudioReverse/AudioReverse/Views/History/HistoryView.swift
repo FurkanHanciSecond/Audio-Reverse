@@ -37,7 +37,11 @@ struct HistoryView: View {
     private var historyList: some View {
         List {
             ForEach(items) { item in
-                historyRow(for: item)
+                NavigationLink {
+                    HistoryDetailView(item: item)
+                } label: {
+                    historyRow(for: item)
+                }
             }
             .onDelete(perform: deleteItems)
         }
@@ -75,12 +79,6 @@ struct HistoryView: View {
                         .foregroundStyle(.white.opacity(0.5))
                 }
             }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.3))
         }
         .padding(.vertical, 8)
     }
@@ -101,6 +99,7 @@ struct HistoryView: View {
         for index in offsets {
             modelContext.delete(items[index])
         }
+        try? modelContext.save()
     }
 
     // MARK: - Helpers
