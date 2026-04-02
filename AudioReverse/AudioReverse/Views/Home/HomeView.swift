@@ -322,12 +322,23 @@ struct HomeView: View {
         let item = AudioHistoryItem(
             name: name,
             sourceType: sourceType,
-            originalFilePath: sourceURL.path(),
-            reversedFilePath: reversedURL.path(),
-            duration: duration, itemURL: sourceURL
+            originalFilePath: relativePath(from: sourceURL),
+            reversedFilePath: relativePath(from: reversedURL),
+            duration: duration
         )
         modelContext.insert(item)
         try? modelContext.save()
+    }
+
+    /// Returns a path relative to the app's Documents directory so stored
+    /// paths remain valid across container UUID changes (e.g. Simulator rebuilds).
+    private func relativePath(from url: URL) -> String {
+        let docsPath = URL.documentsDirectory.path(percentEncoded: false)
+        let fullPath = url.path(percentEncoded: false)
+        guard fullPath.hasPrefix(docsPath) else { return fullPath }
+        var relative = String(fullPath.dropFirst(docsPath.count))
+        if relative.hasPrefix("/") { relative = String(relative.dropFirst()) }
+        return relative
     }
 
     private func audioDuration(for url: URL) -> TimeInterval {

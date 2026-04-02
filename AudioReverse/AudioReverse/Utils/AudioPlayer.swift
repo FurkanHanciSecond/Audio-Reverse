@@ -15,6 +15,14 @@ class AudioPlayer {
     private(set) var currentTime: TimeInterval = 0
     private(set) var duration: TimeInterval = 0
 
+    var isLooping = false {
+        didSet { audioPlayer?.numberOfLoops = isLooping ? -1 : 0 }
+    }
+
+    var rate: Float = 1.0 {
+        didSet { audioPlayer?.rate = rate }
+    }
+
     var remainingTime: TimeInterval {
         max(duration - currentTime, 0)
     }
@@ -32,10 +40,14 @@ class AudioPlayer {
             try session.setActive(true)
 
             audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.enableRate = true
+            audioPlayer?.rate = rate
+            audioPlayer?.numberOfLoops = isLooping ? -1 : 0
             delegate = PlayerDelegate { [weak self] in
                 Task { @MainActor in
                     self?.stopTimer()
                     self?.isPlaying = false
+                    self?.currentTime = 0
                 }
             }
             audioPlayer?.delegate = delegate
@@ -57,8 +69,14 @@ class AudioPlayer {
         currentTime = 0
     }
 
+    func seek(to time: TimeInterval) {
+        let clamped = max(0, min(time, duration))
+        audioPlayer?.currentTime = clamped
+        currentTime = clamped
+    }
+
     private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.currentTime = self?.audioPlayer?.currentTime ?? 0
             }
