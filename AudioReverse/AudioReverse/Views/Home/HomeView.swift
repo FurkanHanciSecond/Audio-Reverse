@@ -324,7 +324,7 @@ struct HomeView: View {
             sourceType: sourceType,
             originalFilePath: sourceURL.path(),
             reversedFilePath: reversedURL.path(),
-            duration: duration
+            duration: duration, itemURL: sourceURL
         )
         modelContext.insert(item)
         try? modelContext.save()

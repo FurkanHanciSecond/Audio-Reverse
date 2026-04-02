@@ -6,20 +6,23 @@
 //
 
 import SwiftUI
+import WaveformScrubber
 
 struct HistoryDetailView: View {
     let item: AudioHistoryItem
+    @State private var progress: CGFloat = 0.25
 
     var body: some View {
-        Text("History Detail \(item.sourceType)")
-    }
-}
+        VStack {
+            Text("Playback Progress: \(Int(progress * 100))%")
 
-#Preview {
-    HistoryDetailView(item: AudioHistoryItem(
-        name: "Sample Recording",
-        sourceType: .recording,
-        originalFilePath: "",
-        duration: 90
-    ))
+            WaveformScrubber(config: .init(activeTint: .blue, inactiveTint: .black), drawer: BarDrawer(), url: item.itemURL!, progress: $progress)
+                .frame(height: 100)
+                .padding()
+
+            // Control the progress from outside
+            Slider(value: $progress)
+                .padding()
+        }
+    }
 }

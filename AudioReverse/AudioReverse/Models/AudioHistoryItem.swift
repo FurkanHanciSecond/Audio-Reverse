@@ -21,6 +21,7 @@ final class AudioHistoryItem {
     var reversedFilePath: String?
     var duration: TimeInterval
     var createdDate: Date
+    var itemURL: URL?
 
     init(
         name: String,
@@ -28,7 +29,8 @@ final class AudioHistoryItem {
         originalFilePath: String,
         reversedFilePath: String? = nil,
         duration: TimeInterval,
-        createdDate: Date = .now
+        createdDate: Date = .now,
+        itemURL: URL? = nil
     ) {
         self.name = name
         self.sourceType = sourceType
@@ -36,5 +38,6 @@ final class AudioHistoryItem {
         self.reversedFilePath = reversedFilePath
         self.duration = duration
         self.createdDate = createdDate
+        self.itemURL = itemURL
     }
 }
