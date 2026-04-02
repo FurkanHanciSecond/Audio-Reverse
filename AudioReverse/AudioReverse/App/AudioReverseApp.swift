@@ -13,14 +13,14 @@ struct AudioReverseApp: App {
 
     var body: some Scene {
         WindowGroup {
-            OnboardingView()
-                .environment(onboardingManager)
-//            if onboardingManager.isOnboardingShown {
-//                MainTabView()
-//            } else {
-//                OnboardingView()
-//                    .environment(onboardingManager)
-//            }
+//            OnboardingView()
+//                .environment(onboardingManager)
+            if onboardingManager.isOnboardingShown {
+                MainTabView()
+            } else {
+                OnboardingView()
+                    .environment(onboardingManager)
+            }
         }
     }
 }

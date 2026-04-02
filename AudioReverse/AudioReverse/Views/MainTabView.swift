@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum AppTab {
-    case home, settings
+    case home, history,settings
 }
 
 struct MainTabView: View {
@@ -16,8 +16,12 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            Tab("Home", systemImage: "house", value: .home) {
+            Tab("Home", systemImage: "microphone", value: .home) {
                 HomeView()
+            }
+
+            Tab("Settings", systemImage: "list.bullet", value: .history) {
+                HistoryView()
             }
 
             Tab("Settings", systemImage: "gear", value: .settings) {
