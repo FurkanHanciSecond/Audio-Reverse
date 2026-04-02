@@ -16,6 +16,7 @@ struct HistoryDetailView: View {
     @State private var isDragging = false
     @State private var isReversed = false
     @State private var speed: Double = 1.0
+    @State private var pitchSemitones: Double = 0
 
     private var activeURL: URL {
         isReversed ? (item.reversedURL ?? item.originalURL) : item.originalURL
@@ -30,6 +31,7 @@ struct HistoryDetailView: View {
             waveformSection
             transportSection
             speedSection
+            pitchSection
             Spacer()
         }
         .padding(.horizontal, 20)
@@ -159,6 +161,37 @@ struct HistoryDetailView: View {
         }
     }
 
+    // MARK: - Pitch
+
+    private var pitchSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Pitch")
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+
+            HStack(spacing: 10) {
+                Text("-12")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.5))
+
+                Slider(value: $pitchSemitones, in: -12...12, step: 1) { _ in
+                    player.pitch = Float(pitchSemitones * 100)
+                }
+                .tint(.blue)
+
+                Text("+12")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.5))
+            }
+
+            Text(pitchSemitones == 0 ? "0 st" : String(format: "%+.0f st", pitchSemitones))
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.5))
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+
     // MARK: - Actions
 
     private func togglePlay() {
@@ -166,6 +199,7 @@ struct HistoryDetailView: View {
             player.stop()
         } else {
             player.rate = Float(speed)
+            player.pitch = Float(pitchSemitones * 100)
             player.play(url: activeURL)
         }
     }
@@ -177,6 +211,7 @@ struct HistoryDetailView: View {
         isReversed.toggle()
         if wasPlaying {
             player.rate = Float(speed)
+            player.pitch = Float(pitchSemitones * 100)
             player.play(url: activeURL)
         }
     }
