@@ -171,18 +171,16 @@ struct HistoryDetailView: View {
                 .foregroundStyle(.white)
 
             HStack(spacing: 10) {
-                Text("-12")
+                Text("😈")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.5))
 
                 Slider(value: $pitchSemitones, in: -12...12, step: 1) { _ in
                     player.pitch = Float(pitchSemitones * 100)
                 }
                 .tint(.blue)
 
-                Text("+12")
+                Text("🐿️")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.5))
             }
 
             Text(pitchSemitones == 0 ? "0 st" : String(format: "%+.0f st", pitchSemitones))
