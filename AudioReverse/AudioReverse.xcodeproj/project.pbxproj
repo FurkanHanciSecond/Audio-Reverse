@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		70529F912F7EA67500E53993 /* WaveformScrubber in Frameworks */ = {isa = PBXBuildFile; productRef = 70529F902F7EA67500E53993 /* WaveformScrubber */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		706CE55C2F7AAF9900FE7CB1 /* AudioReverse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioReverse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70529F912F7EA67500E53993 /* WaveformScrubber in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = AudioReverse;
 			packageProductDependencies = (
+				70529F902F7EA67500E53993 /* WaveformScrubber */,
 			);
 			productName = AudioReverse;
 			productReference = 706CE55C2F7AAF9900FE7CB1 /* AudioReverse.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = 706CE5532F7AAF9900FE7CB1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				70529F8F2F7EA67500E53993 /* XCRemoteSwiftPackageReference "WaveformScrubber" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 706CE55D2F7AAF9900FE7CB1 /* Products */;
 			projectDirPath = "";
@@ -349,6 +358,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		70529F8F2F7EA67500E53993 /* XCRemoteSwiftPackageReference "WaveformScrubber" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lkora/WaveformScrubber.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		70529F902F7EA67500E53993 /* WaveformScrubber */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 70529F8F2F7EA67500E53993 /* XCRemoteSwiftPackageReference "WaveformScrubber" */;
+			productName = WaveformScrubber;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 706CE5542F7AAF9900FE7CB1 /* Project object */;
 }

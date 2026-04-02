@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
+import AVFoundation
 import UniformTypeIdentifiers
 
 struct HomeView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var recorder = AudioRecorder()
     @State private var normalPlayer = AudioPlayer()
     @State private var reversedPlayer = AudioPlayer()
@@ -211,7 +214,7 @@ struct HomeView: View {
             recorder.stopRecording()
             importedFileURL = nil
             reversedURL = nil
-            reverseAudio(from: recorder.recordingURL)
+            reverseAudio(from: recorder.recordingURL, sourceType: .recording)
         } else {
             normalPlayer.stop()
             reversedPlayer.stop()
@@ -266,13 +269,13 @@ struct HomeView: View {
             importedFileURL = destination
             reversedURL = nil
 
-            reverseAudio(from: destination)
+            reverseAudio(from: destination, sourceType: .fileImport)
         } catch {
             importedFileURL = nil
         }
     }
 
-    private func reverseAudio(from url: URL?) {
+    private func reverseAudio(from url: URL?, sourceType: AudioSourceType) {
         guard let url else { return }
         withAnimation {
             isReversing = true
@@ -281,12 +284,38 @@ struct HomeView: View {
             do {
                 let reversed = try await AudioReverser.reverse(url: url)
                 reversedURL = reversed
+                saveHistoryItem(sourceURL: url, reversedURL: reversed, sourceType: sourceType)
             } catch {
                 reversedURL = nil
             }
             withAnimation {
                 isReversing = false
             }
+        }
+    }
+
+    private func saveHistoryItem(sourceURL: URL, reversedURL: URL, sourceType: AudioSourceType) {
+        let name = sourceURL.deletingPathExtension().lastPathComponent
+        let duration = audioDuration(for: sourceURL)
+
+        let item = AudioHistoryItem(
+            name: name,
+            sourceType: sourceType,
+            originalFilePath: sourceURL.path(),
+            reversedFilePath: reversedURL.path(),
+            duration: duration
+        )
+        modelContext.insert(item)
+    }
+
+    private func audioDuration(for url: URL) -> TimeInterval {
+        do {
+            let audioFile = try AVAudioFile(forReading: url)
+            let frames = Double(audioFile.length)
+            let sampleRate = audioFile.processingFormat.sampleRate
+            return frames / sampleRate
+        } catch {
+            return 0
         }
     }
 }

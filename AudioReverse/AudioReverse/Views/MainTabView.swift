@@ -20,7 +20,7 @@ struct MainTabView: View {
                 HomeView()
             }
 
-            Tab("Settings", systemImage: "list.bullet", value: .history) {
+            Tab("History", systemImage: "list.bullet", value: .history) {
                 HistoryView()
             }
 

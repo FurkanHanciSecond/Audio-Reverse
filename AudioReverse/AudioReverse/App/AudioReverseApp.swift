@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct AudioReverseApp: App {
@@ -22,5 +23,6 @@ struct AudioReverseApp: App {
                     .environment(onboardingManager)
             }
         }
+        .modelContainer(for: AudioHistoryItem.self)
     }
 }
