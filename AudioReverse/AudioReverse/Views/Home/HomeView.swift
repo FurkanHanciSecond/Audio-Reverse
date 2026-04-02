@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HomeView: View {
     @State private var recorder = AudioRecorder()
@@ -14,32 +15,56 @@ struct HomeView: View {
 
     @State private var reversedURL: URL?
     @State private var isReversing = false
+    @State private var showFilePicker = false
+    @State private var importedFileURL: URL?
 
     private var hasRecording: Bool {
-        !recorder.isRecording && recorder.recordingURL != nil
+        !recorder.isRecording && (recorder.recordingURL != nil || importedFileURL != nil)
     }
+
+    private var sourceURL: URL? {
+        importedFileURL ?? recorder.recordingURL
+    }
+
+    private static let supportedAudioTypes: [UTType] = [
+        .wav,
+        .mp3,
+        .mpeg4Audio,
+        .aiff,
+        .audio
+    ]
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                recordCard
-                playCard
-                reverseCard
+            ZStack {
+                VStack(spacing: 20) {
+                    recordCard
+                    playCard
+                    reverseCard
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+
+                if isReversing {
+                    reversingOverlay
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black.ignoresSafeArea())
             .sensoryFeedback(.impact, trigger: recorder.isRecording)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        //TODO: Present DocumentPicker
-                    } label: {
-                        Image(systemName: "document")
+                    Button("Import Audio", systemImage: "document.fill") {
+                        showFilePicker = true
                     }
-
                 }
+            }
+            .fileImporter(
+                isPresented: $showFilePicker,
+                allowedContentTypes: Self.supportedAudioTypes,
+                allowsMultipleSelection: false
+            ) { result in
+                handleImportedFile(result)
             }
         }
     }
@@ -48,16 +73,7 @@ struct HomeView: View {
 
     private var recordCard: some View {
         Button {
-            if recorder.isRecording {
-                recorder.stopRecording()
-                reversedURL = nil
-                reverseAudio()
-            } else {
-                normalPlayer.stop()
-                reversedPlayer.stop()
-                reversedURL = nil
-                Task { await recorder.startRecording() }
-            }
+            handleRecordTapped()
         } label: {
             cardContent(
                 icon: recorder.isRecording ? "stop.fill" : "mic.fill",
@@ -74,12 +90,7 @@ struct HomeView: View {
 
     private var playCard: some View {
         Button {
-            if normalPlayer.isPlaying {
-                normalPlayer.stop()
-            } else if let url = recorder.recordingURL {
-                reversedPlayer.stop()
-                normalPlayer.play(url: url)
-            }
+            handlePlayTapped()
         } label: {
             cardContent(
                 icon: normalPlayer.isPlaying ? "stop.fill" : "play.fill",
@@ -98,12 +109,7 @@ struct HomeView: View {
 
     private var reverseCard: some View {
         Button {
-            if reversedPlayer.isPlaying {
-                reversedPlayer.stop()
-            } else if let url = reversedURL {
-                normalPlayer.stop()
-                reversedPlayer.play(url: url)
-            }
+            handleReversedPlayTapped()
         } label: {
             cardContent(
                 icon: reversedPlayer.isPlaying ? "stop.fill" : "arrow.counterclockwise",
@@ -116,6 +122,26 @@ struct HomeView: View {
         .disabled(reversedURL == nil)
         .sensoryFeedback(.success, trigger: reversedPlayer.isPlaying)
         .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: reversedURL != nil)
+    }
+
+    // MARK: - Reversing Overlay
+
+    private var reversingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.7)
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                ProgressView()
+                    .controlSize(.extraLarge)
+                    .tint(.white)
+
+                Text("Reversing Audio...")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+            }
+        }
+        .transition(.opacity)
     }
 
     // MARK: - Card Content
@@ -178,18 +204,89 @@ struct HomeView: View {
         .transition(.scale.combined(with: .opacity))
     }
 
-    // MARK: - Reverse Logic
+    // MARK: - Actions
 
-    private func reverseAudio() {
-        guard let url = recorder.recordingURL else { return }
-        isReversing = true
+    private func handleRecordTapped() {
+        if recorder.isRecording {
+            recorder.stopRecording()
+            importedFileURL = nil
+            reversedURL = nil
+            reverseAudio(from: recorder.recordingURL)
+        } else {
+            normalPlayer.stop()
+            reversedPlayer.stop()
+            importedFileURL = nil
+            reversedURL = nil
+            Task { await recorder.startRecording() }
+        }
+    }
+
+    private func handlePlayTapped() {
+        if normalPlayer.isPlaying {
+            normalPlayer.stop()
+        } else if let url = sourceURL {
+            reversedPlayer.stop()
+            normalPlayer.play(url: url)
+        }
+    }
+
+    private func handleReversedPlayTapped() {
+        if reversedPlayer.isPlaying {
+            reversedPlayer.stop()
+        } else if let url = reversedURL {
+            normalPlayer.stop()
+            reversedPlayer.play(url: url)
+        }
+    }
+
+    private func handleImportedFile(_ result: Result<[URL], Error>) {
+        guard case .success(let urls) = result,
+              let selectedURL = urls.first else { return }
+
+        guard selectedURL.startAccessingSecurityScopedResource() else { return }
+        defer { selectedURL.stopAccessingSecurityScopedResource() }
+
+        let destination = URL.documentsDirectory
+            .appending(path: "Imported")
+            .appending(path: selectedURL.lastPathComponent)
+
+        do {
+            let importDir = destination.deletingLastPathComponent()
+            if !FileManager.default.fileExists(atPath: importDir.path()) {
+                try FileManager.default.createDirectory(at: importDir, withIntermediateDirectories: true)
+            }
+
+            if FileManager.default.fileExists(atPath: destination.path()) {
+                try FileManager.default.removeItem(at: destination)
+            }
+            try FileManager.default.copyItem(at: selectedURL, to: destination)
+
+            normalPlayer.stop()
+            reversedPlayer.stop()
+            importedFileURL = destination
+            reversedURL = nil
+
+            reverseAudio(from: destination)
+        } catch {
+            importedFileURL = nil
+        }
+    }
+
+    private func reverseAudio(from url: URL?) {
+        guard let url else { return }
+        withAnimation {
+            isReversing = true
+        }
         Task {
             do {
-                reversedURL = try await AudioReverser.reverse(url: url)
+                let reversed = try await AudioReverser.reverse(url: url)
+                reversedURL = reversed
             } catch {
                 reversedURL = nil
             }
-            isReversing = false
+            withAnimation {
+                isReversing = false
+            }
         }
     }
 }
