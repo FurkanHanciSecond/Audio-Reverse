@@ -17,6 +17,7 @@ struct HistoryDetailView: View {
     @State private var isReversed = false
     @State private var speed: Double = 1.0
     @State private var pitchSemitones: Double = 0
+    @State private var shareURL: URL?
 
     private var activeURL: URL {
         isReversed ? (item.reversedURL ?? item.originalURL) : item.originalURL
@@ -48,6 +49,45 @@ struct HistoryDetailView: View {
             if !playing { progress = 0 }
         }
         .onDisappear { player.stop() }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu("Share", systemImage: "square.and.arrow.up") {
+                    Button("Original", systemImage: "waveform") {
+                        shareURL = item.originalURL
+                        OperationQueue.main.addOperation {
+                            let shareActivity = UIActivityViewController(activityItems: [shareURL as Any], applicationActivities: nil)
+                            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                  let window = windowScene.windows.first,
+                                  let vc = window.rootViewController else {
+                                return
+                            }
+                            shareActivity.popoverPresentationController?.sourceView = vc.view
+                            shareActivity.popoverPresentationController?.sourceRect = CGRect(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height, width: 0, height: 0)
+                            shareActivity.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.down
+                            vc.present(shareActivity, animated: true, completion: nil)
+                        }
+                    }
+
+                    if let reversedURL = item.reversedURL {
+                        Button("Reversed", systemImage: "arrow.uturn.backward") {
+                            shareURL = reversedURL
+                            OperationQueue.main.addOperation {
+                                let shareActivity = UIActivityViewController(activityItems: [reversedURL], applicationActivities: nil)
+                                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                      let window = windowScene.windows.first,
+                                      let vc = window.rootViewController else {
+                                    return
+                                }
+                                shareActivity.popoverPresentationController?.sourceView = vc.view
+                                shareActivity.popoverPresentationController?.sourceRect = CGRect(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height, width: 0, height: 0)
+                                shareActivity.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.down
+                                vc.present(shareActivity, animated: true, completion: nil)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Waveform
@@ -172,7 +212,7 @@ struct HistoryDetailView: View {
 
             HStack(spacing: 10) {
                 Text("😈")
-                    .font(.caption)
+                    .font(.system(size: 20))
 
                 Slider(value: $pitchSemitones, in: -12...12, step: 1) { _ in
                     player.pitch = Float(pitchSemitones * 100)
@@ -180,7 +220,7 @@ struct HistoryDetailView: View {
                 .tint(.blue)
 
                 Text("🐿️")
-                    .font(.caption)
+                    .font(.system(size: 20))
             }
 
             Text(pitchSemitones == 0 ? "0 st" : String(format: "%+.0f st", pitchSemitones))
