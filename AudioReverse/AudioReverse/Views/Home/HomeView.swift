@@ -8,10 +8,13 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import RevenueCat
+import PhotosUI
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(UserDefaultsManager.self) private var userDefaultsManager
     @State private var viewModel = HomeViewModel()
+    @State private var selectedVideoItem: PhotosPickerItem?
 
     private static let supportedAudioTypes: [UTType] = [
         .wav,
@@ -35,14 +38,24 @@ struct HomeView: View {
                 if viewModel.isReversing {
                     reversingOverlay
                 }
+
+                if viewModel.isExtracting {
+                    extractingOverlay
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black.ignoresSafeArea())
             .sensoryFeedback(.impact, trigger: viewModel.recorder.isRecording)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Import Audio", systemImage: "document.fill") {
+                    Button("", systemImage: "document.fill") {
                         viewModel.showFilePicker = true
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    PhotosPicker(selection: $selectedVideoItem, matching: .videos) {
+                        Image(systemName: "video")
                     }
                 }
             }
@@ -53,16 +66,22 @@ struct HomeView: View {
             ) { result in
                 viewModel.handleImportedFile(result)
             }
-            .alert("Error", isPresented: Binding(
-                get: { viewModel.errorMessage != nil },
-                set: { if !$0 { viewModel.errorMessage = nil } }
-            )) {
-                Button("OK") { viewModel.errorMessage = nil }
+            .onChange(of: selectedVideoItem) {
+                guard let selectedVideoItem else { return }
+                viewModel.handleVideoSelected(selectedVideoItem)
+                self.selectedVideoItem = nil
+            }
+            .alert("Error", isPresented: $viewModel.showError) {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
             .onAppear {
                 viewModel.modelContext = modelContext
+                viewModel.userDefaultsManager = userDefaultsManager
+                viewModel.check()
+            }
+            .fullScreenCover(isPresented: $viewModel.showPaywall) {
+                PaywallView()
             }
         }
     }
@@ -139,6 +158,26 @@ struct HomeView: View {
         .transition(.opacity)
     }
 
+    // MARK: - Extracting Overlay
+
+    private var extractingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.7)
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                ProgressView()
+                    .controlSize(.extraLarge)
+                    .tint(.white)
+
+                Text("Extracting Audio...")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+            }
+        }
+        .transition(.opacity)
+    }
+
     // MARK: - Card Content
 
     private func cardContent(
@@ -193,9 +232,12 @@ struct HomeView: View {
                 .frame(width: 8, height: 8)
                 .shadow(color: color, radius: 4)
 
-            Text(String(format: "%.1fs", currentTime))
-                .font(.system(size: 14, weight: .medium, design: .monospaced))
-                .foregroundStyle(.white.opacity(0.8))
+            HStack(spacing: 0) {
+                Text(currentTime, format: .number.precision(.fractionLength(1)))
+                Text("s")
+            }
+            .font(.system(size: 14, weight: .medium, design: .monospaced))
+            .foregroundStyle(.white.opacity(0.8))
         }
         .transition(.scale.combined(with: .opacity))
     }

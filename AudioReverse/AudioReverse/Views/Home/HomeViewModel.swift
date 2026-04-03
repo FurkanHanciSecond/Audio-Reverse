@@ -8,9 +8,15 @@
 import Foundation
 import AVFoundation
 import SwiftData
+import Photos
+import PhotosUI
+import RevenueCat
+import StoreKit
+import _PhotosUI_SwiftUI
 
 @MainActor @Observable
 final class HomeViewModel {
+
     var recorder = AudioRecorder()
     var normalPlayer = AudioPlayer()
     var reversedPlayer = AudioPlayer()
@@ -18,10 +24,16 @@ final class HomeViewModel {
     var reversedURL: URL?
     var isReversing = false
     var showFilePicker = false
+    var showPaywall = false
+    var isExtracting = false
     var importedFileURL: URL?
     var errorMessage: String?
+    var showError = false
 
     var modelContext: ModelContext?
+    var userDefaultsManager: UserDefaultsManager?
+
+    private let maxFreeDuration: TimeInterval = 60
 
     var hasRecording: Bool {
         !recorder.isRecording && (recorder.recordingURL != nil || importedFileURL != nil)
@@ -32,6 +44,23 @@ final class HomeViewModel {
     }
 
     // MARK: - Actions
+
+    func check() {
+        userDefaultsManager?.appRunCount += 1
+        checkSubscriptionStatus()
+    }
+
+    func checkSubscriptionStatus(triggerPaywallIfNeeded: Bool = true) {
+        Task {
+            guard let info = try? await Purchases.shared.customerInfo() else { return }
+            let isActive = self.checkPremiumEntitlement(info: info)
+            if isActive {
+                self.handlePremiumActive(info: info)
+            } else {
+                self.handlePremiumInactive(info: info, triggerPaywallIfNeeded: triggerPaywallIfNeeded)
+            }
+        }
+    }
 
     func handleRecordTapped() {
         if recorder.isRecording {
@@ -60,10 +89,23 @@ final class HomeViewModel {
     func handleReversedPlayTapped() {
         if reversedPlayer.isPlaying {
             reversedPlayer.stop()
-        } else if let url = reversedURL {
-            normalPlayer.stop()
-            reversedPlayer.play(url: url)
+            return
         }
+
+        guard let userDefaultsManager else { return }
+        guard let url = reversedURL else { return }
+
+        if !userDefaultsManager.isPremium {
+            let sourceToCheck = sourceURL ?? url
+            if userDefaultsManager.remainingCount <= 0 || !canProcessAudio(url: sourceToCheck) {
+                showPaywall = true
+                return
+            }
+            userDefaultsManager.remainingCount -= 1
+        }
+
+        normalPlayer.stop()
+        reversedPlayer.play(url: url)
     }
 
     func handleImportedFile(_ result: Result<[URL], Error>) {
@@ -76,11 +118,40 @@ final class HomeViewModel {
         }
     }
 
+    func handleVideoSelected(_ item: PhotosPickerItem) {
+        isExtracting = true
+        Task {
+            defer { isExtracting = false }
+
+            do {
+                guard let videoData = try await item.loadTransferable(type: VideoTransferable.self) else {
+                    errorMessage = "Could not load the selected video."
+                    showError = true
+                    return
+                }
+
+                let videoAsset = AVURLAsset(url: videoData.url)
+                let extractedAudioURL = try await MediaProcessingService.extractAudio(from: videoAsset)
+
+                normalPlayer.stop()
+                reversedPlayer.stop()
+                importedFileURL = extractedAudioURL
+                reversedURL = nil
+
+                reverseAudio(from: extractedAudioURL, sourceType: .fileImport)
+            } catch {
+                errorMessage = "Failed to extract audio: \(error.localizedDescription)"
+                showError = true
+            }
+        }
+    }
+
     // MARK: - File Import
 
     private func importFile(from selectedURL: URL) {
         guard selectedURL.startAccessingSecurityScopedResource() else {
             errorMessage = "Could not access the selected file."
+            showError = true
             return
         }
         defer { selectedURL.stopAccessingSecurityScopedResource() }
@@ -96,6 +167,7 @@ final class HomeViewModel {
             try FileManager.default.copyItem(at: selectedURL, to: destination)
         } catch {
             errorMessage = "Failed to import file: \(error.localizedDescription)"
+            showError = true
             return
         }
 
@@ -121,6 +193,7 @@ final class HomeViewModel {
             } catch {
                 reversedURL = nil
                 errorMessage = "Failed to reverse audio: \(error.localizedDescription)"
+                showError = true
             }
             isReversing = false
         }
@@ -155,6 +228,12 @@ final class HomeViewModel {
         return relative
     }
 
+    private func canProcessAudio(url: URL) -> Bool {
+        guard let userDefaultsManager else { return true }
+        if userDefaultsManager.isPremium { return true }
+        return audioDuration(for: url) <= maxFreeDuration
+    }
+
     private func audioDuration(for url: URL) -> TimeInterval {
         do {
             let audioFile = try AVAudioFile(forReading: url)
@@ -164,5 +243,39 @@ final class HomeViewModel {
         } catch {
             return 0
         }
+    }
+}
+
+//MARK: - RevenueCat
+extension HomeViewModel {
+    private func checkPremiumEntitlement(info: CustomerInfo) -> Bool {
+        let premiumEntitlements = ["audioReverseLifeTime"]
+        return premiumEntitlements.contains { info.entitlements[$0]?.isActive == true }
+    }
+
+    private func handlePremiumActive(info: CustomerInfo) {
+        userDefaultsManager?.isPremium = true
+    }
+
+    private func handlePremiumInactive(info: CustomerInfo, triggerPaywallIfNeeded: Bool) {
+        userDefaultsManager?.isPremium = false
+
+        guard triggerPaywallIfNeeded else { return }
+
+        let count = userDefaultsManager?.appRunCount ?? 0
+
+        if count == 2 {
+            Task { @MainActor in
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    AppStore.requestReview(in: windowScene)
+                }
+            }
+        } else if count >= 3 && count.isMultiple(of: 2) == false {
+            presentNormalPaywallAndTrackEvent(info: info)
+        }
+    }
+
+    private func presentNormalPaywallAndTrackEvent(info: CustomerInfo) {
+        showPaywall = true
     }
 }

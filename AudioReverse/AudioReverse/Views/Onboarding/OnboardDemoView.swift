@@ -150,7 +150,7 @@ struct OnboardDemoView: View {
                     .foregroundStyle(.green)
                     .symbolEffect(.bounce, value: showSuccessOverlay)
 
-                Text("You Did It!")
+                Text("Perfect!")
                     .font(.system(size: 42, weight: .bold))
             }
         }

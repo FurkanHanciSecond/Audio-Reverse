@@ -8,10 +8,22 @@
 import SwiftUI
 import SwiftData
 
+enum HistoryViewFullScreens: Identifiable {
+
+    var id: UUID {
+        UUID()
+    }
+
+    case paywall
+}
+
 struct HistoryView: View {
     @Query(sort: \AudioHistoryItem.createdDate, order: .reverse)
     private var items: [AudioHistoryItem]
     @Environment(\.modelContext) private var modelContext
+    @Environment(UserDefaultsManager.self) private var userDefaultsManager
+    @State private var activeFullScreens: HistoryViewFullScreens?
+    @State private var selectedItem: AudioHistoryItem?
 
     var body: some View {
         NavigationStack {
@@ -29,6 +41,15 @@ struct HistoryView: View {
             .navigationTitle("History")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black.ignoresSafeArea())
+            .navigationDestination(item: $selectedItem) { item in
+                HistoryDetailView(item: item)
+            }
+        }
+        .fullScreenCover(item: $activeFullScreens) { screen in
+            switch screen {
+            case .paywall:
+                PaywallView()
+            }
         }
     }
 
@@ -37,8 +58,8 @@ struct HistoryView: View {
     private var historyList: some View {
         List {
             ForEach(items) { item in
-                NavigationLink {
-                    HistoryDetailView(item: item)
+                Button {
+                    handleRowTapped(item)
                 } label: {
                     historyRow(for: item)
                 }
@@ -94,6 +115,14 @@ struct HistoryView: View {
     }
 
     // MARK: - Actions
+
+    private func handleRowTapped(_ item: AudioHistoryItem) {
+        if !userDefaultsManager.isPremium && userDefaultsManager.remainingCount <= 0 {
+            activeFullScreens = .paywall
+        } else {
+            selectedItem = item
+        }
+    }
 
     private func deleteItems(at offsets: IndexSet) {
         for index in offsets {

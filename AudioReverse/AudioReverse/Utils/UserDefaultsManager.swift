@@ -11,7 +11,7 @@ import Observation
 @MainActor @Observable
 class UserDefaultsManager {
 
-    private static let defaultRemainingCount = 3
+    private static let defaultRemainingCount = 0
 
     var isPremium: Bool {
         get {
@@ -37,10 +37,21 @@ class UserDefaultsManager {
         }
     }
 
+    var appRunCount: Int {
+        get {
+            access(keyPath: \.appRunCount)
+            return UserDefaults.standard.integer(forKey: "appRunCount")
+        }
+        set {
+            withMutation(keyPath: \.appRunCount) {
+                UserDefaults.standard.set(newValue, forKey: "appRunCount")
+            }
+        }
+    }
+
 
     func setupDefaultsIfNeeded() {
-        if !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") {
-            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+        if appRunCount == 0 {
             remainingCount = Self.defaultRemainingCount
         }
     }

@@ -1,5 +1,5 @@
 {
-  "originHash" : "14dbde3dea0bb764cfc421430c1a73b3c765c9c1009db26d09bc9a135eed63b6",
+  "originHash" : "570281a4f61371c89740aa0ab06122dcaf27dc13c4c488edc98163f16a02200f",
   "pins" : [
     {
       "identity" : "purchases-ios-spm",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "66f81c19e29170cecc1f155c62cd586cf53b8400",
         "version" : "5.67.1"
+      }
+    },
+    {
+      "identity" : "svprogresshud",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SVProgressHUD/SVProgressHUD.git",
+      "state" : {
+        "revision" : "c33f7c775ba7feea6047a1fc3257f2e5863b44f7",
+        "version" : "2.3.1"
       }
     },
     {
