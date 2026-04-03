@@ -233,6 +233,7 @@ struct HistoryDetailView: View {
     // MARK: - Actions
 
     private func togglePlay() {
+        UIImpactFeedbackGenerator().impactOccurred()
         if player.isPlaying {
             player.stop()
         } else {

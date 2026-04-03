@@ -6,29 +6,11 @@
 //
 
 import SwiftUI
-import SwiftData
-import AVFoundation
 import UniformTypeIdentifiers
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var recorder = AudioRecorder()
-    @State private var normalPlayer = AudioPlayer()
-    @State private var reversedPlayer = AudioPlayer()
-
-    @State private var reversedURL: URL?
-    @State private var isReversing = false
-    @State private var showFilePicker = false
-    @State private var importedFileURL: URL?
-    @State private var errorMessage: String?
-
-    private var hasRecording: Bool {
-        !recorder.isRecording && (recorder.recordingURL != nil || importedFileURL != nil)
-    }
-
-    private var sourceURL: URL? {
-        importedFileURL ?? recorder.recordingURL
-    }
+    @State private var viewModel = HomeViewModel()
 
     private static let supportedAudioTypes: [UTType] = [
         .wav,
@@ -49,34 +31,37 @@ struct HomeView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
 
-                if isReversing {
+                if viewModel.isReversing {
                     reversingOverlay
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black.ignoresSafeArea())
-            .sensoryFeedback(.impact, trigger: recorder.isRecording)
+            .sensoryFeedback(.impact, trigger: viewModel.recorder.isRecording)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Import Audio", systemImage: "document.fill") {
-                        showFilePicker = true
+                        viewModel.showFilePicker = true
                     }
                 }
             }
             .fileImporter(
-                isPresented: $showFilePicker,
+                isPresented: $viewModel.showFilePicker,
                 allowedContentTypes: Self.supportedAudioTypes,
                 allowsMultipleSelection: false
             ) { result in
-                handleImportedFile(result)
+                viewModel.handleImportedFile(result)
             }
             .alert("Error", isPresented: Binding(
-                get: { errorMessage != nil },
-                set: { if !$0 { errorMessage = nil } }
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
             )) {
-                Button("OK") { errorMessage = nil }
+                Button("OK") { viewModel.errorMessage = nil }
             } message: {
-                Text(errorMessage ?? "")
+                Text(viewModel.errorMessage ?? "")
+            }
+            .onAppear {
+                viewModel.modelContext = modelContext
             }
         }
     }
@@ -84,16 +69,14 @@ struct HomeView: View {
     // MARK: - Record Card
 
     private var recordCard: some View {
-        Button {
-            handleRecordTapped()
-        } label: {
+        Button(action: viewModel.handleRecordTapped) {
             cardContent(
-                icon: recorder.isRecording ? "stop.fill" : "mic.fill",
-                title: recorder.isRecording ? "Stop Recording" : "Start Recording",
+                icon: viewModel.recorder.isRecording ? "stop.fill" : "mic.fill",
+                title: viewModel.recorder.isRecording ? "Stop Recording" : "Start Recording",
                 color: .red,
-                isActive: recorder.isRecording,
+                isActive: viewModel.recorder.isRecording,
                 isDisabled: false,
-                currentTime: recorder.currentTime
+                currentTime: viewModel.recorder.currentTime
             )
         }
         .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: true)
@@ -102,41 +85,37 @@ struct HomeView: View {
     // MARK: - Play Recorded Card
 
     private var playCard: some View {
-        Button {
-            handlePlayTapped()
-        } label: {
+        Button(action: viewModel.handlePlayTapped) {
             cardContent(
-                icon: normalPlayer.isPlaying ? "stop.fill" : "play.fill",
-                title: normalPlayer.isPlaying ? "Stop" : "Play Recorded",
+                icon: viewModel.normalPlayer.isPlaying ? "stop.fill" : "play.fill",
+                title: viewModel.normalPlayer.isPlaying ? "Stop" : "Play Recorded",
                 color: .green,
-                isActive: normalPlayer.isPlaying,
-                isDisabled: !hasRecording,
-                currentTime: normalPlayer.remainingTime
+                isActive: viewModel.normalPlayer.isPlaying,
+                isDisabled: !viewModel.hasRecording,
+                currentTime: viewModel.normalPlayer.remainingTime
             )
         }
-        .disabled(!hasRecording)
-        .sensoryFeedback(.success, trigger: normalPlayer.isPlaying)
-        .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: hasRecording)
+        .disabled(!viewModel.hasRecording)
+        .sensoryFeedback(.success, trigger: viewModel.normalPlayer.isPlaying)
+        .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: viewModel.hasRecording)
     }
 
     // MARK: - Play Reversed Card
 
     private var reverseCard: some View {
-        Button {
-            handleReversedPlayTapped()
-        } label: {
+        Button(action: viewModel.handleReversedPlayTapped) {
             cardContent(
-                icon: reversedPlayer.isPlaying ? "stop.fill" : "arrow.counterclockwise",
-                title: reversedPlayer.isPlaying ? "Stop" : "Play Reversed",
+                icon: viewModel.reversedPlayer.isPlaying ? "stop.fill" : "arrow.counterclockwise",
+                title: viewModel.reversedPlayer.isPlaying ? "Stop" : "Play Reversed",
                 color: .blue,
-                isActive: reversedPlayer.isPlaying,
-                isDisabled: reversedURL == nil,
-                currentTime: reversedPlayer.remainingTime
+                isActive: viewModel.reversedPlayer.isPlaying,
+                isDisabled: viewModel.reversedURL == nil,
+                currentTime: viewModel.reversedPlayer.remainingTime
             )
         }
-        .disabled(reversedURL == nil)
-        .sensoryFeedback(.success, trigger: reversedPlayer.isPlaying)
-        .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: reversedURL != nil)
+        .disabled(viewModel.reversedURL == nil)
+        .sensoryFeedback(.success, trigger: viewModel.reversedPlayer.isPlaying)
+        .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: viewModel.reversedURL != nil)
     }
 
     // MARK: - Reversing Overlay
@@ -218,138 +197,6 @@ struct HomeView: View {
                 .foregroundStyle(.white.opacity(0.8))
         }
         .transition(.scale.combined(with: .opacity))
-    }
-
-    // MARK: - Actions
-
-    private func handleRecordTapped() {
-        if recorder.isRecording {
-            recorder.stopRecording()
-            importedFileURL = nil
-            reversedURL = nil
-            reverseAudio(from: recorder.recordingURL, sourceType: .recording)
-        } else {
-            normalPlayer.stop()
-            reversedPlayer.stop()
-            importedFileURL = nil
-            reversedURL = nil
-            Task { await recorder.startRecording() }
-        }
-    }
-
-    private func handlePlayTapped() {
-        if normalPlayer.isPlaying {
-            normalPlayer.stop()
-        } else if let url = sourceURL {
-            reversedPlayer.stop()
-            normalPlayer.play(url: url)
-        }
-    }
-
-    private func handleReversedPlayTapped() {
-        if reversedPlayer.isPlaying {
-            reversedPlayer.stop()
-        } else if let url = reversedURL {
-            normalPlayer.stop()
-            reversedPlayer.play(url: url)
-        }
-    }
-
-    private func handleImportedFile(_ result: Result<[URL], Error>) {
-        switch result {
-        case .failure:
-            return
-        case .success(let urls):
-            guard let selectedURL = urls.first else { return }
-            importFile(from: selectedURL)
-        }
-    }
-
-    private func importFile(from selectedURL: URL) {
-        guard selectedURL.startAccessingSecurityScopedResource() else {
-            errorMessage = "Could not access the selected file."
-            return
-        }
-        defer { selectedURL.stopAccessingSecurityScopedResource() }
-
-        let importDir = URL.documentsDirectory.appending(path: "Imported")
-        let uniqueName = "\(UUID().uuidString)_\(selectedURL.lastPathComponent)"
-        let destination = importDir.appending(path: uniqueName)
-
-        do {
-            if !FileManager.default.fileExists(atPath: importDir.path()) {
-                try FileManager.default.createDirectory(at: importDir, withIntermediateDirectories: true)
-            }
-            try FileManager.default.copyItem(at: selectedURL, to: destination)
-        } catch {
-            errorMessage = "Failed to import file: \(error.localizedDescription)"
-            return
-        }
-
-        normalPlayer.stop()
-        reversedPlayer.stop()
-        importedFileURL = nil
-        reversedURL = nil
-
-        importedFileURL = destination
-        reverseAudio(from: destination, sourceType: .fileImport)
-    }
-
-    private func reverseAudio(from url: URL?, sourceType: AudioSourceType) {
-        guard let url else { return }
-        withAnimation {
-            isReversing = true
-        }
-        Task {
-            do {
-                let reversed = try await AudioReverser.reverse(url: url)
-                reversedURL = reversed
-                saveHistoryItem(sourceURL: url, reversedURL: reversed, sourceType: sourceType)
-            } catch {
-                reversedURL = nil
-                errorMessage = "Failed to reverse audio: \(error.localizedDescription)"
-            }
-            withAnimation {
-                isReversing = false
-            }
-        }
-    }
-
-    private func saveHistoryItem(sourceURL: URL, reversedURL: URL, sourceType: AudioSourceType) {
-        let name = sourceURL.deletingPathExtension().lastPathComponent
-        let duration = audioDuration(for: sourceURL)
-
-        let item = AudioHistoryItem(
-            name: name,
-            sourceType: sourceType,
-            originalFilePath: relativePath(from: sourceURL),
-            reversedFilePath: relativePath(from: reversedURL),
-            duration: duration
-        )
-        modelContext.insert(item)
-        try? modelContext.save()
-    }
-
-    /// Returns a path relative to the app's Documents directory so stored
-    /// paths remain valid across container UUID changes (e.g. Simulator rebuilds).
-    private func relativePath(from url: URL) -> String {
-        let docsPath = URL.documentsDirectory.path(percentEncoded: false)
-        let fullPath = url.path(percentEncoded: false)
-        guard fullPath.hasPrefix(docsPath) else { return fullPath }
-        var relative = String(fullPath.dropFirst(docsPath.count))
-        if relative.hasPrefix("/") { relative = String(relative.dropFirst()) }
-        return relative
-    }
-
-    private func audioDuration(for url: URL) -> TimeInterval {
-        do {
-            let audioFile = try AVAudioFile(forReading: url)
-            let frames = Double(audioFile.length)
-            let sampleRate = audioFile.processingFormat.sampleRate
-            return frames / sampleRate
-        } catch {
-            return 0
-        }
     }
 }
 

@@ -1,6 +1,15 @@
 {
-  "originHash" : "99593829b4dc90f5b7c755bf5003323d9e979ec7ae0df050a4b541d9e45bf865",
+  "originHash" : "14dbde3dea0bb764cfc421430c1a73b3c765c9c1009db26d09bc9a135eed63b6",
   "pins" : [
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm",
+      "state" : {
+        "revision" : "66f81c19e29170cecc1f155c62cd586cf53b8400",
+        "version" : "5.67.1"
+      }
+    },
     {
       "identity" : "waveformscrubber",
       "kind" : "remoteSourceControl",

@@ -7,15 +7,19 @@
 
 import SwiftUI
 import SwiftData
+import RevenueCat
 
 @main
 struct AudioReverseApp: App {
     @State var onboardingManager = OnboardingManager()
 
+    init() {
+        Purchases.logLevel = .debug
+        Purchases.configure(with: Configuration.Builder(withAPIKey: "appl_PaWIihPPutCwBxcLnZmMXauWhdt").with(storeKitVersion: .storeKit2).build())
+    }
+
     var body: some Scene {
         WindowGroup {
-//            OnboardingView()
-//                .environment(onboardingManager)
             if onboardingManager.isOnboardingShown {
                 MainTabView()
             } else {
