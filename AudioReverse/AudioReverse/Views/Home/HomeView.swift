@@ -136,6 +136,26 @@ struct HomeView: View {
         .disabled(viewModel.reversedURL == nil)
         .sensoryFeedback(.success, trigger: viewModel.reversedPlayer.isPlaying)
         .compatibleGlassEffect(cornerRadius: 24, interactiveEnabled: viewModel.reversedURL != nil)
+        .overlay(alignment: .topTrailing) {
+            if viewModel.reversedURL != nil {
+                Button {
+                    UIImpactFeedbackGenerator().impactOccurred()
+                    if !userDefaultsManager.isPremium && userDefaultsManager.remainingCount <= 0 {
+                        viewModel.showPaywall = true
+                    } else {
+                        shareReversedAudio()
+                    }
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.white)
+                        .padding(10)
+                        .background(.white.opacity(0.15), in: Circle())
+                        .compatibleCircularGlassEffect(interactiveEnabled: true)
+                }
+                .padding(12)
+            }
+        }
     }
 
     // MARK: - Reversing Overlay
@@ -240,6 +260,24 @@ struct HomeView: View {
             .foregroundStyle(.white.opacity(0.8))
         }
         .transition(.scale.combined(with: .opacity))
+    }
+
+    // MARK: - Share
+
+    private func shareReversedAudio() {
+        guard let url = viewModel.reversedURL else { return }
+        let shareActivity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let vc = window.rootViewController else { return }
+        shareActivity.popoverPresentationController?.sourceView = vc.view
+        shareActivity.popoverPresentationController?.sourceRect = CGRect(
+            x: UIScreen.main.bounds.width / 2,
+            y: UIScreen.main.bounds.height,
+            width: 0, height: 0
+        )
+        shareActivity.popoverPresentationController?.permittedArrowDirections = .down
+        vc.present(shareActivity, animated: true)
     }
 }
 
