@@ -14,8 +14,9 @@ struct OnboardPaywall: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            Button("Onboard Paywall") {
-                onboardManager.completeOnboarding()
+
+            VStack {
+                Text("Unlock Everything")
             }
         }
     }

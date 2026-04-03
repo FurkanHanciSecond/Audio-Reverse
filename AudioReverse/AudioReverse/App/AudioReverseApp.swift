@@ -22,14 +22,16 @@ struct AudioReverseApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if onboardingManager.isOnboardingShown {
-                MainTabView()
-                    .environment(userDefaultsManager)
-            } else {
-                OnboardingView()
-                    .environment(onboardingManager)
-                    .environment(userDefaultsManager)
-            }
+            MainTabView()
+                .environment(userDefaultsManager)
+//            if onboardingManager.isOnboardingShown {
+//                MainTabView()
+//                    .environment(userDefaultsManager)
+//            } else {
+//                OnboardingView()
+//                    .environment(onboardingManager)
+//                    .environment(userDefaultsManager)
+//            }
         }
         .modelContainer(for: AudioHistoryItem.self)
     }
