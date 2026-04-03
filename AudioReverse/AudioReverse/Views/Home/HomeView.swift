@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import RevenueCat
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
