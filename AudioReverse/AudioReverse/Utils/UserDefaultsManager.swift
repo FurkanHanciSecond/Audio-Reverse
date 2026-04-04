@@ -11,7 +11,7 @@ import Observation
 @MainActor @Observable
 class UserDefaultsManager {
 
-    private static let defaultRemainingCount = 0
+    private static let defaultRemainingCount = 3
 
     var isPremium: Bool {
         get {

@@ -11,6 +11,7 @@ import WaveformScrubber
 struct HistoryDetailView: View {
     let item: AudioHistoryItem
 
+    @Environment(UserDefaultsManager.self) private var userDefaultsManager
     @State private var player = AudioPlayer()
     @State private var progress: CGFloat = 0
     @State private var isDragging = false
@@ -18,6 +19,7 @@ struct HistoryDetailView: View {
     @State private var speed: Double = 1.0
     @State private var pitchSemitones: Double = 0
     @State private var shareURL: URL?
+    @State private var showPaywall = false
 
     private var activeURL: URL {
         isReversed ? (item.reversedURL ?? item.originalURL) : item.originalURL
@@ -227,6 +229,34 @@ struct HistoryDetailView: View {
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
                 .frame(maxWidth: .infinity, alignment: .center)
+        }
+        .disabled(!userDefaultsManager.isPremium)
+        .overlay {
+            if !userDefaultsManager.isPremium {
+                VStack(spacing: 8) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(.gray)
+
+                    Text("Pro")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 64, height: 64)
+                .compatibleCircularGlassEffect(interactiveEnabled: true)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .foregroundStyle(.black)
+                        .opacity(0.1)
+                )
+                .onTapGesture {
+                    showPaywall = true
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
 

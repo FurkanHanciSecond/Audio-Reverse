@@ -13,7 +13,7 @@ struct Onboard2: View {
     @State private var displayedText = ""
     @State private var currentCharacterIndex = 0
 
-    private let reverseText = "Reverse"
+    private let reverseText = String(localized: "Reverse")
     private let animationDelay: Duration = .milliseconds(50)
 
     var body: some View {
@@ -29,6 +29,8 @@ struct Onboard2: View {
 
                 Text(displayedText)
                     .font(.system(size: 80, weight: .bold))
+                    .minimumScaleFactor(0.8)
+                    .multilineTextAlignment(.center)
             }
         }
         .sensoryFeedback(.impact, trigger: isIconAnimated)

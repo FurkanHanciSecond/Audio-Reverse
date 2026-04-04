@@ -10,13 +10,50 @@
 		70529F912F7EA67500E53993 /* WaveformScrubber in Frameworks */ = {isa = PBXBuildFile; productRef = 70529F902F7EA67500E53993 /* WaveformScrubber */; };
 		7064ADED2F800EF300B06E04 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 7064ADEC2F800EF300B06E04 /* RevenueCat */; };
 		7064ADF02F80116600B06E04 /* SVProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 7064ADEF2F80116600B06E04 /* SVProgressHUD */; };
+		70B955472F81B1E200324F31 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70B955462F81B1E100324F31 /* WidgetKit.framework */; };
+		70B955492F81B1E200324F31 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70B955482F81B1E200324F31 /* SwiftUI.framework */; };
+		70B955542F81B1E300324F31 /* RecordWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 70B955442F81B1E100324F31 /* RecordWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		70B955522F81B1E300324F31 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 706CE5542F7AAF9900FE7CB1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 70B955432F81B1E100324F31;
+			remoteInfo = RecordWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		70B955592F81B1E300324F31 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				70B955542F81B1E300324F31 /* RecordWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		706CE55C2F7AAF9900FE7CB1 /* AudioReverse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioReverse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		70B955442F81B1E100324F31 /* RecordWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RecordWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		70B955462F81B1E100324F31 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		70B955482F81B1E200324F31 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		70B955582F81B1E300324F31 /* Exceptions for "RecordWidget" folder in "RecordWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 70B955432F81B1E100324F31 /* RecordWidgetExtension */;
+		};
 		70E70C642F7ACF7200146782 /* Exceptions for "AudioReverse" folder in "AudioReverse" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -35,6 +72,14 @@
 			path = AudioReverse;
 			sourceTree = "<group>";
 		};
+		70B9554A2F81B1E200324F31 /* RecordWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				70B955582F81B1E300324F31 /* Exceptions for "RecordWidget" folder in "RecordWidgetExtension" target */,
+			);
+			path = RecordWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +93,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		70B955412F81B1E100324F31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70B955492F81B1E200324F31 /* SwiftUI.framework in Frameworks */,
+				70B955472F81B1E200324F31 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -55,6 +109,8 @@
 			isa = PBXGroup;
 			children = (
 				706CE55E2F7AAF9900FE7CB1 /* AudioReverse */,
+				70B9554A2F81B1E200324F31 /* RecordWidget */,
+				70B955452F81B1E100324F31 /* Frameworks */,
 				706CE55D2F7AAF9900FE7CB1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,8 +119,18 @@
 			isa = PBXGroup;
 			children = (
 				706CE55C2F7AAF9900FE7CB1 /* AudioReverse.app */,
+				70B955442F81B1E100324F31 /* RecordWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		70B955452F81B1E100324F31 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				70B955462F81B1E100324F31 /* WidgetKit.framework */,
+				70B955482F81B1E200324F31 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -77,10 +143,12 @@
 				706CE5582F7AAF9900FE7CB1 /* Sources */,
 				706CE5592F7AAF9900FE7CB1 /* Frameworks */,
 				706CE55A2F7AAF9900FE7CB1 /* Resources */,
+				70B955592F81B1E300324F31 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				70B955532F81B1E300324F31 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				706CE55E2F7AAF9900FE7CB1 /* AudioReverse */,
@@ -95,6 +163,28 @@
 			productReference = 706CE55C2F7AAF9900FE7CB1 /* AudioReverse.app */;
 			productType = "com.apple.product-type.application";
 		};
+		70B955432F81B1E100324F31 /* RecordWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 70B955552F81B1E300324F31 /* Build configuration list for PBXNativeTarget "RecordWidgetExtension" */;
+			buildPhases = (
+				70B955402F81B1E100324F31 /* Sources */,
+				70B955412F81B1E100324F31 /* Frameworks */,
+				70B955422F81B1E100324F31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				70B9554A2F81B1E200324F31 /* RecordWidget */,
+			);
+			name = RecordWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = RecordWidgetExtension;
+			productReference = 70B955442F81B1E100324F31 /* RecordWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -108,6 +198,9 @@
 					706CE55B2F7AAF9900FE7CB1 = {
 						CreatedOnToolsVersion = 26.3;
 					};
+					70B955432F81B1E100324F31 = {
+						CreatedOnToolsVersion = 26.3;
+					};
 				};
 			};
 			buildConfigurationList = 706CE5572F7AAF9900FE7CB1 /* Build configuration list for PBXProject "AudioReverse" */;
@@ -116,6 +209,11 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
+				ja,
+				ko,
+				es,
+				fr,
 			);
 			mainGroup = 706CE5532F7AAF9900FE7CB1;
 			minimizedProjectReferenceProxies = 1;
@@ -130,12 +228,20 @@
 			projectRoot = "";
 			targets = (
 				706CE55B2F7AAF9900FE7CB1 /* AudioReverse */,
+				70B955432F81B1E100324F31 /* RecordWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		706CE55A2F7AAF9900FE7CB1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		70B955422F81B1E100324F31 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -152,7 +258,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		70B955402F81B1E100324F31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		70B955532F81B1E300324F31 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 70B955432F81B1E100324F31 /* RecordWidgetExtension */;
+			targetProxy = 70B955522F81B1E300324F31 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		706CE5652F7AAF9A00FE7CB1 /* Debug */ = {
@@ -215,6 +336,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -272,6 +394,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -352,6 +475,66 @@
 			};
 			name = Release;
 		};
+		70B955562F81B1E300324F31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F97AL9VQUZ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RecordWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RecordWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bulenthanci.AudioReverse.RecordWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		70B955572F81B1E300324F31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F97AL9VQUZ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RecordWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RecordWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bulenthanci.AudioReverse.RecordWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -369,6 +552,15 @@
 			buildConfigurations = (
 				706CE5682F7AAF9A00FE7CB1 /* Debug */,
 				706CE5692F7AAF9A00FE7CB1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		70B955552F81B1E300324F31 /* Build configuration list for PBXNativeTarget "RecordWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				70B955562F81B1E300324F31 /* Debug */,
+				70B955572F81B1E300324F31 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

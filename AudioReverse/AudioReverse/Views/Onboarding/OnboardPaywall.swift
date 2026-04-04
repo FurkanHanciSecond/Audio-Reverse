@@ -12,22 +12,22 @@ import SVProgressHUD
 struct Feature: Identifiable {
     let id = UUID()
     let emoji: String
-    let title: LocalizedStringKey
+    let title: String
 }
 
 struct OnboardPaywall: View {
 
     @Environment(UserDefaultsManager.self) private var userDefaultsManager
     @Environment(OnboardingManager.self) var onboardManager
-    @State private var lifeTimePriceText: String = ""
+    @State private var lifeTimePriceText = ""
     @State private var isMovingAround : Bool = false
     @State private var showIndex: Int = -1
 
     var features = [
-        Feature(emoji: "⏪", title: .init("Reverse Longer Audios")),
-        Feature(emoji: "🔊", title: .init("Sound Effects")),
-        Feature(emoji: "♾️", title: .init("Unlimited Usage")),
-        Feature(emoji: "📤", title: .init("Unlimited Sharing")),
+        Feature(emoji: "⏪", title: String(localized: "Reverse Longer Audios")),
+        Feature(emoji: "🔊", title: String(localized: "Sound Effects")),
+        Feature(emoji: "♾️", title: String(localized: "Unlimited Usage")),
+        Feature(emoji: "📤", title: String(localized: "Unlimited Sharing")),
     ]
 
     var body: some View {
@@ -46,9 +46,12 @@ struct OnboardPaywall: View {
                 featuresView
                     .padding(.top, 15)
 
-                Text("Just For: \(lifeTimePriceText)" + " ❤️")
-                    .font(.system(size: 22, weight: .semibold))
-                    .padding(.top, 25)
+                HStack {
+                    Text("Just For: \(lifeTimePriceText)")
+                    Text("❤️")
+                }
+                .font(.system(size: 22, weight: .semibold))
+                .padding(.top, 25)
 
                 continueButtonView
 
@@ -82,6 +85,7 @@ struct OnboardPaywall: View {
                     Text(feature.title)
                         .font(.system(size: 25, weight: .semibold))
                         .foregroundStyle(.white)
+                        .minimumScaleFactor(0.5)
 
                     Spacer()
                 }
@@ -153,9 +157,4 @@ struct OnboardPaywall: View {
             completion(packages)
         }
     }
-}
-
-#Preview {
-    OnboardPaywall()
-        .environment(OnboardingManager())
 }
