@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct OnboardDemoView: View {
     @Environment(OnboardingManager.self) var onboardManager
@@ -18,6 +19,7 @@ struct OnboardDemoView: View {
     @State private var reversedURL: URL?
     @State private var isReversing = false
     @State private var showSuccessOverlay = false
+    @State private var showReviewAlert = false
 
     private let demoText = String(localized: "Try it yourself!")
     private let animationDelay: Duration = .milliseconds(50)
@@ -50,6 +52,14 @@ struct OnboardDemoView: View {
             }
         }
         .sensoryFeedback(.impact(flexibility: .solid, intensity: 1), trigger: currentCharacterIndex)
+        .onChange(of: recorder.isRecording) { oldValue, newValue in
+            if oldValue, !newValue {
+                Task {
+                    try? await Task.sleep(for: .seconds(1))
+                    showReviewAlert = true
+                }
+            }
+        }
         .onChange(of: player.isPlaying) { oldValue, newValue in
             if oldValue, !newValue, reversedURL != nil {
                 Task {
@@ -57,10 +67,20 @@ struct OnboardDemoView: View {
                     withAnimation {
                         showSuccessOverlay = true
                     }
-                    try? await Task.sleep(for: .seconds(1.5))
+                    try? await Task.sleep(for: .seconds(1))
                     onboardManager.nextScreen()
                 }
             }
+        }
+        .alert("Can you show us some love? 🥺", isPresented: $showReviewAlert) {
+            Button("Yes please! 🌟", role: nil) {
+                requestAppReview()
+            }
+            .keyboardShortcut(.defaultAction)
+
+            Button("Not now", role: .cancel) {}
+        } message: {
+            Text("Your review means the world to us! 💛")
         }
         .task {
             await startTypingAnimation()
@@ -155,6 +175,12 @@ struct OnboardDemoView: View {
             }
         }
         .transition(.opacity)
+    }
+
+    private func requestAppReview() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            AppStore.requestReview(in: windowScene)
+        }
     }
 
     private func startTypingAnimation() async {
