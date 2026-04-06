@@ -410,6 +410,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AudioReverse/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Audio Reverser";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record voice and reverse it";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -449,6 +450,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AudioReverse/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Audio Reverser";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To record voice and reverse it";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
