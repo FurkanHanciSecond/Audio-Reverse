@@ -80,7 +80,7 @@ struct OnboardPaywall: View {
                     Text(feature.title)
                         .font(.system(size: 25, weight: .semibold))
                         .foregroundStyle(.white)
-                        .minimumScaleFactor(0.5)
+                        .minimumScaleFactor(0.8)
 
                     Spacer()
                 }
