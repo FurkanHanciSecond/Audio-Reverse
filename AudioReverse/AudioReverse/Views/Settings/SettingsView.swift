@@ -81,7 +81,7 @@ struct SettingsView: View {
                         .listRowBackground(Color.gray.opacity(0.15))
                         .onTapGesture {
                             OperationQueue.main.addOperation {
-                                let shareActivity = UIActivityViewController(activityItems: [URL(string: "https://apps.apple.com/us/app/ai-roast-maker-generator/id6753349828")!], applicationActivities: nil)
+                                let shareActivity = UIActivityViewController(activityItems: [URL(string: "https://apps.apple.com/us/app/reverse-audio-play-singing/id6761620228")!], applicationActivities: nil)
                                 let window = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.rootViewController
                                 if let vc = window {
                                     shareActivity.popoverPresentationController?.sourceView = vc.view
