@@ -175,7 +175,7 @@ struct SettingsView: View {
                         .listRowBackground(Color.gray.opacity(0.15))
                         .listRowSeparatorTint(.white.opacity(0.2), edges: .all)
                         .onTapGesture {
-                            openURL(URL(string: "https://docs.google.com/document/d/1owglwbBkdzpSfqRFVEOngBYuaCLrbtlDfERxKTSVNFs/edit?usp=sharing")!)
+                            openURL(URL(string: "https://docs.google.com/document/d/1ewWb5WXb7IHn9mfUIGDg3Uj8ebPihHD-HeYlyBM_pM4/edit?usp=sharing")!)
                         }
 
                         HStack {
@@ -193,7 +193,7 @@ struct SettingsView: View {
                         .clipped()
                         .listRowBackground(Color.gray.opacity(0.15))
                         .onTapGesture {
-                            openURL(URL(string: "https://docs.google.com/document/d/1edG4zZ1Gay0YC-o3gjRaHVQ-36S3Wu4M73vb8RBhQeA/edit?usp=sharing")!)
+                            openURL(URL(string: "https://docs.google.com/document/d/1FT_5OKyz_F8mZn3-A-kluJKpGogjjp4_rS4UykqgY2I/edit?usp=sharing")!)
                         }
 
                     } header: {
@@ -254,8 +254,8 @@ struct SettingsView: View {
 
     func feedBackButtonTapped() {
         let recipientEmail = "furkanhanci265@gmail.com"
-        let subject = "About Antique Identifier App"
-        let body = ""
+        let subject = "About Audio Reverser App"
+        let body = "USER ID: \(Purchases.shared.appUserID)"
         let composer = MFMailComposeViewController()
         composer.setToRecipients([recipientEmail])
         composer.setSubject(subject)

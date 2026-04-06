@@ -19,6 +19,7 @@ struct OnboardPaywall: View {
 
     @Environment(UserDefaultsManager.self) private var userDefaultsManager
     @Environment(OnboardingManager.self) var onboardManager
+    @Environment(\.openURL) var openURL
     @State private var lifeTimePriceText = ""
     @State private var isMovingAround : Bool = false
     @State private var showIndex: Int = -1
@@ -55,13 +56,7 @@ struct OnboardPaywall: View {
 
                 continueButtonView
 
-                Text("not now")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.gray)
-                    .opacity(0.4)
-                    .onTapGesture {
-                        onboardManager.completeOnboarding()
-                    }
+                termsOfUseLabelsView
             }
             .onAppear(perform: {
                 Purchases.shared.getOfferings { offer, err in
@@ -133,6 +128,41 @@ struct OnboardPaywall: View {
         }
     }
 
+    var termsOfUseLabelsView: some View {
+        HStack {
+            Text("Terms Of Use")
+                .foregroundColor(.gray)
+                .font(.system(size: 12))
+                .onTapGesture {
+                    openURL(URL(string: "https://docs.google.com/document/d/1FT_5OKyz_F8mZn3-A-kluJKpGogjjp4_rS4UykqgY2I/edit?usp=sharing")!)
+                }
+
+            Text("Restore Purchases")
+                .foregroundStyle(.gray)
+                .font(.system(size: 12))
+                .onTapGesture {
+                    restorePurchases()
+                }
+
+            Text("Privacy Policy")
+                .foregroundColor(.gray)
+                .font(.system(size: 12))
+                .onTapGesture {
+                    openURL(URL(string: "https://docs.google.com/document/d/1ewWb5WXb7IHn9mfUIGDg3Uj8ebPihHD-HeYlyBM_pM4/edit?usp=sharing")!)
+                }
+
+            Text("not now")
+                .foregroundColor(.gray)
+                .font(.system(size: 12))
+                .onTapGesture {
+                    onboardManager.completeOnboarding()
+                }
+        }
+        .opacity(0.5)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal , 10)
+    }
+
     private func purchasePackageLifeTime(package:Package?){
         SVProgressHUD.show()
         if (package != nil){
@@ -155,6 +185,21 @@ struct OnboardPaywall: View {
             guard let offerings = offerings , err == nil else { return }
             guard let packages = offerings["lifeTimeOffer"]?.lifetime else { return }
             completion(packages)
+        }
+    }
+
+    private func restorePurchases() {
+        SVProgressHUD.show()
+        Purchases.shared.restorePurchases { info, err in
+            guard let info = info else { return }
+            if info.entitlements["audioReverseLifeTime"]?.isActive == true {
+                SVProgressHUD.dismiss()
+                userDefaultsManager.isPremium = true
+                onboardManager.completeOnboarding()
+            } else {
+                userDefaultsManager.isPremium = false
+                SVProgressHUD.dismiss()
+            }
         }
     }
 }
