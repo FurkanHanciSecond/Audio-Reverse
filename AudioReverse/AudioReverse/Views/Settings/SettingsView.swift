@@ -273,7 +273,7 @@ struct SettingsView: View {
 
         Purchases.shared.restorePurchases { info, err in
             guard let info = info else { return }
-            if info.activeSubscriptions.count > 0 {
+            if info.entitlements["audioReverseLifeTime"]?.isActive == true {
                 SVProgressHUD.dismiss()
                 userDefaultsManager.isPremium = true
             } else {
